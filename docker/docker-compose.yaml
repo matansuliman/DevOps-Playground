@@ -1,0 +1,6 @@
+services:
+  quake-watch:
+    build: .
+    container_name: quake-watch-app
+    ports:
+      - "5000:5000"
