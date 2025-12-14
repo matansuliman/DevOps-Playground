@@ -1,0 +1,77 @@
+#!/bin/bash
+set -euo pipefail
+
+# ===== Vars from Terraform (אלה כן חייבים להישאר) =====
+DB_HOST="${wp_db_host}"
+DB_NAME="${wp_db_name}"
+DB_USER="${wp_db_user}"
+DB_PASSWORD="${wp_db_password}"
+EFS_DNS="${efs_dns_name}"
+WP_IMAGE="${wp_container_image}"
+# ===================================================================
+
+echo "== update =="
+dnf -y update
+
+echo "== install docker =="
+dnf -y install docker
+systemctl enable --now docker
+
+echo "== install docker compose v2 plugin (github release) =="
+if ! docker compose version >/dev/null 2>&1; then
+  ARCH="x86_64"
+  VER="v2.24.6"
+
+  mkdir -p /usr/local/lib/docker/cli-plugins /usr/libexec/docker/cli-plugins
+
+  curl -fsSL "https://github.com/docker/compose/releases/download/${VER}/docker-compose-linux-${ARCH}" \
+    -o /usr/local/lib/docker/cli-plugins/docker-compose
+  chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+  ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
+fi
+
+docker compose version
+
+echo "== install nfs utils for EFS =="
+dnf -y install nfs-utils
+
+# WordPress path
+WP_ROOT="/opt/wordpress"
+mkdir -p "$WP_ROOT"
+
+# EFS mount for wp-content
+EFS_MOUNT="/mnt/efs-wp-content"
+mkdir -p "$EFS_MOUNT"
+
+# Mount EFS (NFSv4.1)
+if ! mountpoint -q "$EFS_MOUNT"; then
+  grep -q "^$EFS_DNS:/" /etc/fstab || echo "$EFS_DNS:/ $EFS_MOUNT nfs4 defaults,_netdev 0 0" >> /etc/fstab
+  mount -a
+fi
+
+# Ensure wp-content structure exists
+mkdir -p "$EFS_MOUNT/uploads" "$EFS_MOUNT/plugins" "$EFS_MOUNT/themes"
+chown -R 33:33 "$EFS_MOUNT" || true
+chmod -R u+rwX,g+rwX "$EFS_MOUNT" || true
+
+cat > "$WP_ROOT/docker-compose.yml" <<YAML
+services:
+  wordpress:
+    image: $WP_IMAGE
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: "$DB_HOST"
+      WORDPRESS_DB_USER: "$DB_USER"
+      WORDPRESS_DB_PASSWORD: "$DB_PASSWORD"
+      WORDPRESS_DB_NAME: "$DB_NAME"
+    volumes:
+      - "$EFS_MOUNT:/var/www/html/wp-content"
+YAML
+
+echo "== bring up wordpress =="
+docker compose -f "$WP_ROOT/docker-compose.yml" up -d
+
+echo "== done =="
