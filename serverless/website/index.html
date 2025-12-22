@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>React on S3</title>
+  <style>
+    body {
+      font-family: system-ui, Arial;
+      margin: 0;
+      padding: 32px;
+    }
+
+    .card {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- React (UMD) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- JSX support (simple demo; for real apps use a build) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+
+  <script type="text/babel" src="./app.js"></script>
+</body>
+
+</html>
