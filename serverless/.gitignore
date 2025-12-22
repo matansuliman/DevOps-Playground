@@ -1,0 +1,13 @@
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+crash.log
+
+# Terraform plans / vars (local)
+**/tfplan
+**/*.tfplan
+**/terraform.tfvars
+**/*.tfvars
+
+modules/api-lambda-http/*.zip
+website/config.json
