@@ -45,6 +45,23 @@ services:
       kafka:
         condition: service_healthy
 
+  producer:
+    build:
+      context: ./producer-app
+    container_name: producer
+    environment:
+      - DB_HOST=tidb
+      - DB_PORT=4000
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_NAME=demo
+    depends_on:
+      tidb:
+        condition: service_healthy
+    networks:
+      - demo
+
+
   # ---------- TiDB (PD + TiKV + TiDB) ----------
   pd:
     image: pingcap/pd:v7.5.1
@@ -85,14 +102,20 @@ services:
     container_name: tidb
     depends_on: [pd, tikv]
     command:
+      - --store=tikv
       - --host=0.0.0.0
-      - --port=4000
+      - -P
+      - "4000"
       - --path=pd:2379
-      - --log-file=/logs/tidb.log
     ports:
       - "4000:4000"
     volumes:
       - tidb-logs:/logs
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:10080/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks: [demo]
 
   # ---------- TiCDC ----------
@@ -109,8 +132,40 @@ services:
       - --log-file=/logs/ticdc.log
     volumes:
       - ticdc-logs:/logs
+    healthcheck:
+      test: ["CMD", "/cdc", "cli", "capture", "list", "--server=http://127.0.0.1:8300"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [demo]
 
+  ticdc-init:
+    image: pingcap/ticdc:v7.5.1
+    container_name: ticdc-init
+    networks: [demo]
+    depends_on:
+      kafka:
+        condition: service_healthy
+      pd:
+        condition: service_started
+      ticdc:
+        condition: service_healthy
+    restart: "no"
+    command:
+      - "/bin/sh"
+      - "-c"
+      - |
+        echo "Waiting for TiCDC API...";
+        until /cdc cli capture list --server=http://ticdc:8300 >/dev/null 2>&1; do
+          sleep 1;
+        done;
+        echo "Creating TiCDC changefeed (id=demo)...";
+        /cdc cli changefeed create \
+          --server=http://ticdc:8300 \
+          --changefeed-id=demo \
+          --sink-uri="kafka://kafka:9092/demo-topic?protocol=canal-json";
+        echo "Done. Changefeed created (or already exists).";
+  
   # ---------- MySQL Client (Tools) ----------
   mysql:
     image: mysql:8
