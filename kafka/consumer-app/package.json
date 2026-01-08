@@ -1,0 +1,9 @@
+{
+    "name": "kafka-consumer-demo",
+    "version": "1.0.0",
+    "main": "consumer.js",
+    "type": "commonjs",
+    "dependencies": {
+        "kafkajs": "^2.2.4"
+    }
+}
