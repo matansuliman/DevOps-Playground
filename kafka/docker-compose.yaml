@@ -32,6 +32,71 @@ services:
       - demo
     depends_on:
       - kafka
+  # ---------- TiDB (PD + TiKV + TiDB) ----------
+  pd:
+    image: pingcap/pd:v7.5.1
+    container_name: pd
+    command:
+      - --name=pd
+      - --data-dir=/data/pd
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://pd:2379
+      - --advertise-peer-urls=http://pd:2380
+      - --initial-cluster=pd=http://pd:2380
+      - --log-file=/logs/pd.log
+    volumes:
+      - pd-data:/data/pd
+      - pd-logs:/logs
+    ports:
+      - "2379:2379"
+    networks: [demo]
+
+  tikv:
+    image: pingcap/tikv:v7.5.1
+    container_name: tikv
+    depends_on: [pd]
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv:20160
+      - --data-dir=/data/tikv
+      - --pd=pd:2379
+      - --log-file=/logs/tikv.log
+    volumes:
+      - tikv-data:/data/tikv
+      - tikv-logs:/logs
+    networks: [demo]
+
+  tidb:
+    image: pingcap/tidb:v7.5.1
+    container_name: tidb
+    depends_on: [pd, tikv]
+    command:
+      - --host=0.0.0.0
+      - --port=4000
+      - --path=pd:2379
+      - --log-file=/logs/tidb.log
+    ports:
+      - "4000:4000"
+    volumes:
+      - tidb-logs:/logs
+    networks: [demo]
+
+  # ---------- TiCDC ----------
+  ticdc:
+    image: pingcap/ticdc:v7.5.1
+    container_name: ticdc
+    depends_on: [pd, kafka]
+    command:
+      - /cdc
+      - server
+      - --addr=0.0.0.0:8300
+      - --advertise-addr=ticdc:8300
+      - --pd=http://pd:2379
+      - --log-file=/logs/ticdc.log
+    volumes:
+      - ticdc-logs:/logs
+    networks: [demo]
 
 networks:
   demo:
