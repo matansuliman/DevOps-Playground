@@ -12,4 +12,4 @@ RUN npm install --omit=dev
 COPY . .
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "/app/consumer.js"]
