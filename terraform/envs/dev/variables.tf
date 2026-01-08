@@ -77,6 +77,13 @@ variable "alb_health_check_path" {
   default     = "/"
 }
 
+# WP Events variables
+variable "wp_events_producer_token" {
+  description = "Shared secret token for WP -> Producer Function URL"
+  type        = string
+  sensitive   = true
+}
+
 # ASG variables
 variable "asg_instance_type" {
   type    = string

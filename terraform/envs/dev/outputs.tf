@@ -58,4 +58,10 @@ output "target_group_arn" {
   value = module.alb.target_group_arn
 }
 
+output "wp_events_producer_function_url" {
+  value = module.wp_events.producer_function_url
+}
 
+output "wp_events_queue_url" {
+  value = module.wp_events.queue_url
+}

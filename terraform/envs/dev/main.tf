@@ -61,6 +61,20 @@ module "alb" {
   health_check_path = var.alb_health_check_path
 }
 
+# ---------- WP -> (Lambda Producer URL) -> SQS -> Lambda Consumer ----------
+module "wp_events" {
+  source = "../../modules/wp-sqs-lambda-minimal"
+
+  name = "legi-bit-wp-${var.env}-events"
+
+  producer_token = var.wp_events_producer_token
+
+  tags = {
+    Project     = "legi-bit"
+    Environment = var.env
+  }
+}
+
 # ---------- ASG WordPress ----------
 module "asg" {
   source = "../../modules/asg-wordpress"
@@ -85,6 +99,9 @@ module "asg" {
   wp_db_password = var.rds_db_password
 
   efs_dns_name = module.efs.dns_name
+
+  wp_events_producer_url   = module.wp_events.producer_function_url
+  wp_events_producer_token = var.wp_events_producer_token
 }
 
 
