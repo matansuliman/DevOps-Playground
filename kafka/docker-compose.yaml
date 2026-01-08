@@ -154,10 +154,6 @@ services:
       - "/bin/sh"
       - "-c"
       - |
-        echo "Waiting for TiCDC API...";
-        until /cdc cli capture list --server=http://ticdc:8300 >/dev/null 2>&1; do
-          sleep 1;
-        done;
         echo "Creating TiCDC changefeed (id=demo)...";
         /cdc cli changefeed create \
           --server=http://ticdc:8300 \
