@@ -110,3 +110,11 @@ services:
 networks:
   demo:
     driver: bridge
+
+volumes:
+  pd-data:
+  tikv-data:
+  pd-logs:
+  tikv-logs:
+  tidb-logs:
+  ticdc-logs:
