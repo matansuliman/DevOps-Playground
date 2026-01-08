@@ -11,4 +11,4 @@ crash.log
 
 infra/modules/api-lambda-http/*.zip
 website/config.json
-deply-dev.ps1
+deploy-dev.ps1
