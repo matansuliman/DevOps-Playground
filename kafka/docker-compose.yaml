@@ -98,6 +98,15 @@ services:
       - ticdc-logs:/logs
     networks: [demo]
 
+  # ---------- MySQL Client (Tools) ----------
+  mysql:
+    image: mysql:8
+    container_name: mysqlclient
+    depends_on: [tidb]
+    profiles: ["tools"]
+    entrypoint: ["bash", "-lc", "sleep infinity"]
+    networks: [demo]
+
 networks:
   demo:
     driver: bridge
