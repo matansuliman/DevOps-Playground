@@ -15,6 +15,10 @@ services:
     working_dir: /app
     volumes:
       - ./consumer:/app
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+      - KAFKA_TOPIC=demo-topic
+      - KAFKA_CONSUMER_GROUP=demo-consumer-group
 
 networks:
   demo:
