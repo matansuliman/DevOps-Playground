@@ -7,6 +7,15 @@ services:
     networks:
       - demo
 
+  consumer:
+    image: node:20-alpine
+    container_name: consumer
+    networks:
+      - demo
+    working_dir: /app
+    volumes:
+      - ./consumer:/app
+
 networks:
   demo:
     driver: bridge
