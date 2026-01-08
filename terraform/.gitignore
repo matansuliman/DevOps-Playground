@@ -8,3 +8,5 @@ crash.log
 **/*.tfplan
 **/terraform.tfvars
 **/*.tfvars
+
+modules/wp-sqs-lambda-minimal/lambda_*.zip
