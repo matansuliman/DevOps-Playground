@@ -8,17 +8,16 @@ services:
       - demo
 
   consumer:
-    image: node:20-alpine
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
     container_name: consumer
-    networks:
-      - demo
-    working_dir: /app
-    volumes:
-      - ./consumer:/app
     environment:
       - KAFKA_BROKER_URL=kafka:9092
       - KAFKA_TOPIC=demo-topic
       - KAFKA_CONSUMER_GROUP=demo-consumer-group
+    networks:
+      - demo
 
 networks:
   demo:
