@@ -8,6 +8,8 @@ DB_USER="${wp_db_user}"
 DB_PASSWORD="${wp_db_password}"
 EFS_DNS="${efs_dns_name}"
 WP_IMAGE="${wp_container_image}"
+WP_EVENTS_URL="${wp_events_producer_url}"
+WP_EVENTS_TOKEN="${wp_events_producer_token}"
 # ===================================================================
 
 echo "== update =="
@@ -51,9 +53,58 @@ if ! mountpoint -q "$EFS_MOUNT"; then
 fi
 
 # Ensure wp-content structure exists
-mkdir -p "$EFS_MOUNT/uploads" "$EFS_MOUNT/plugins" "$EFS_MOUNT/themes"
+mkdir -p "$EFS_MOUNT/uploads" "$EFS_MOUNT/plugins" "$EFS_MOUNT/themes" "$EFS_MOUNT/mu-plugins"
 chown -R 33:33 "$EFS_MOUNT" || true
 chmod -R u+rwX,g+rwX "$EFS_MOUNT" || true
+
+# ----- Create MU-Plugin: publish_post -> Lambda Producer URL -----
+if [[ -n "$WP_EVENTS_URL" && -n "$WP_EVENTS_TOKEN" ]]; then
+  cat > "$EFS_MOUNT/mu-plugins/wp-events-sqs.php" <<PHP
+<?php
+/**
+ * Plugin Name: WP Events -> SQS (via Lambda Producer URL)
+ * Description: Minimal demo: when a post is published, send event to Lambda Producer URL.
+ */
+
+if ( ! defined('ABSPATH') ) { exit; }
+
+define('WP_EVENTS_PRODUCER_URL', '${WP_EVENTS_URL}');
+define('WP_EVENTS_TOKEN', '${WP_EVENTS_TOKEN}');
+define('WP_EVENTS_HEADER', 'X-Token');
+
+function wp_events_send_post_published(\$new_status, \$old_status, \$post) {
+  if (\$new_status !== 'publish' || \$old_status === 'publish') { return; }
+  if (!\$post || empty(\$post->ID)) { return; }
+  if (wp_is_post_revision(\$post->ID) || wp_is_post_autosave(\$post->ID)) { return; }
+
+  \$payload = array(
+    'event'      => 'post_published',
+    'postId'     => \$post->ID,
+    'postTitle'  => get_the_title(\$post->ID),
+    'siteUrl'    => home_url('/'),
+    'occurredAt' => gmdate('c'),
+  );
+
+  \$args = array(
+    'headers'  => array(
+      'Content-Type' => 'application/json',
+      WP_EVENTS_HEADER => WP_EVENTS_TOKEN,
+    ),
+    'body'     => wp_json_encode(\$payload),
+    'timeout'  => 2,
+    'blocking' => false,
+  );
+
+  wp_remote_post(WP_EVENTS_PRODUCER_URL, \$args);
+}
+
+add_action('transition_post_status', 'wp_events_send_post_published', 10, 3);
+PHP
+
+  chown 33:33 "$EFS_MOUNT/mu-plugins/wp-events-sqs.php" || true
+  chmod 644 "$EFS_MOUNT/mu-plugins/wp-events-sqs.php" || true
+fi
+# ----- end MU-Plugin -----
 
 cat > "$WP_ROOT/docker-compose.yml" <<YAML
 services:

@@ -73,6 +73,9 @@ locals {
     efs_dns_name       = var.efs_dns_name
     wp_container_image = var.wp_container_image
 
+    wp_events_producer_url   = var.wp_events_producer_url
+    wp_events_producer_token = var.wp_events_producer_token
+
     VER  = "v2.24.6"
     ARCH = "x86_64"
   })

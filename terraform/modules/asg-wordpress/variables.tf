@@ -87,3 +87,16 @@ variable "attach_ssm" {
   type    = bool
   default = true
 }
+
+variable "wp_events_producer_url" {
+  type        = string
+  description = "Producer Function URL for WP events"
+  default     = ""
+}
+
+variable "wp_events_producer_token" {
+  type        = string
+  description = "Shared secret token for WP -> Producer"
+  sensitive   = true
+  default     = ""
+}
