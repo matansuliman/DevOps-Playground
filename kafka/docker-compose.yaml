@@ -1,0 +1,12 @@
+services:
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: kafka
+    ports:
+      - 9092:9092
+    networks:
+      - demo
+
+networks:
+  demo:
+    driver: bridge
