@@ -61,7 +61,6 @@ services:
     networks:
       - demo
 
-
   # ---------- TiDB (PD + TiKV + TiDB) ----------
   pd:
     image: pingcap/pd:v7.5.1
