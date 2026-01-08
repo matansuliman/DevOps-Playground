@@ -9,5 +9,5 @@ crash.log
 **/terraform.tfvars
 **/*.tfvars
 
-modules/api-lambda-http/*.zip
+infra/modules/api-lambda-http/*.zip
 website/config.json
