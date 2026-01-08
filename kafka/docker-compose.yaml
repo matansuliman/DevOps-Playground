@@ -30,6 +30,8 @@ services:
       - KAFKA_CONSUMER_GROUP=demo-consumer-group
     networks:
       - demo
+    depends_on:
+      - kafka
 
 networks:
   demo:
