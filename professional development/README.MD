@@ -5,6 +5,31 @@ The backend writes to TiDB, TiCDC streams changes to Kafka, and a consumer print
 
 ---
 
+## ✅ Prerequisites
+
+- Docker
+- Docker Compose v2
+
+---
+
+## 🔧 Environment Variables
+
+1. Copy the example env file:
+
+```bash
+cp .env.example .env
+```
+
+(Windows PowerShell)
+
+```powershell
+Copy-Item .env.example .env
+```
+
+2. (Optional) Edit `.env` to adjust ports, topic name, or credentials.
+
+---
+
 ## 🚀 Quick Start
 
 Start everything with a single command:
