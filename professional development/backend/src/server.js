@@ -107,12 +107,12 @@ app.get("/profile", authMiddleware, async (req, res) => {
 });
 
 // Read API port from environment variables
-const PORT = process.env.PORT || 3000;
+const API_PORT = process.env.API_PORT;
 
 // Initialize database and start the server
 (async () => {
     await initDb();
-    app.listen(PORT, () => {
-        console.log(`API listening on :${PORT}`);
+    app.listen(API_PORT, () => {
+        console.log(`API listening on :${API_PORT}`);
     });
 })();
