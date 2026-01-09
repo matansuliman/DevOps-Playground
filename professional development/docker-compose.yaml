@@ -116,7 +116,7 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     environment:
-      - PORT=${API_PORT}
+      - API_PORT=${API_PORT}
       - LOG_LEVEL=${LOG_LEVEL}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
