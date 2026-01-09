@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="he">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 420px;
+      margin: 40px auto;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .row {
+      margin-top: 12px;
+    }
+
+    pre {
+      background: #f6f6f6;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Login</h2>
+
+  <div class="row">
+    <input id="username" placeholder="username / email" />
+    <input id="password" type="password" placeholder="password" />
+    <button id="loginBtn">Login</button>
+  </div>
+
+  <div class="row">
+    <button id="profileBtn">GET /profile (with token)</button>
+  </div>
+
+  <pre id="out"></pre>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    const out = document.getElementById("out");
+
+    function show(obj) {
+      out.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    }
+
+    document.getElementById("loginBtn").onclick = async () => {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        return show("Missing username/password");
+      }
+
+      const r = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) return show({ status: r.status, data });
+
+      localStorage.setItem("token", data.token);
+      show({ ok: true, tokenSaved: true });
+    };
+
+    document.getElementById("profileBtn").onclick = async () => {
+      const token = localStorage.getItem("token");
+      const r = await fetch(`${API_BASE}/profile`, {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+
+      const data = await r.json().catch(() => ({}));
+      show({ status: r.status, data });
+    };
+  </script>
+</body>
+
+</html>
