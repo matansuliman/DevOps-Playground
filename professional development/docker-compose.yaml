@@ -201,9 +201,6 @@ services:
     entrypoint: ["bash", "-lc", "sleep infinity"]
     networks: [demo]
 
-  # --------- Kafka Producer (Tools) ----------
-
-
   # ---------- Kafka Consumer (Tools) ----------
   consumer:
     build:
