@@ -41,7 +41,7 @@ docker compose up --build
 Stop:
 
 ```bash
-docker compose down
+docker compose down -v
 ```
 
 ---
