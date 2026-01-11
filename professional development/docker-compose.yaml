@@ -130,6 +130,8 @@ services:
     depends_on:
       db-init:
         condition: service_completed_successfully
+      ticdc-init:
+        condition: service_completed_successfully
     networks: [demo]
 
   # ---------- Frontend (static HTML) ----------
@@ -181,6 +183,8 @@ services:
     restart: "no"
     environment:
       - KAFKA_TOPIC=${KAFKA_TOPIC}
+    volumes:
+      - ./changefeed.toml:/changefeed.toml
     command:
       - "/bin/sh"
       - "-c"
@@ -189,6 +193,7 @@ services:
         /cdc cli changefeed create \
           --server=http://ticdc:8300 \
           --changefeed-id=demo \
+          --config=/changefeed.toml \
           --sink-uri="kafka://kafka:9092/$${KAFKA_TOPIC}?protocol=canal-json";
         echo "Done. Changefeed created (or already exists)."
 
