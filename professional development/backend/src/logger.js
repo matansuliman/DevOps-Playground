@@ -2,6 +2,12 @@
 
 const log4js = require("log4js");
 
+// Determine log level from environment variable or default to "info"
+const level =
+    process.env.LOG_LEVEL && process.env.LOG_LEVEL.trim()
+        ? process.env.LOG_LEVEL.trim()
+        : "info";
+
 // Configure log4js to write logs to stdout
 log4js.configure({
     appenders: {
@@ -10,7 +16,7 @@ log4js.configure({
     categories: {
         default: {
             appenders: ["out"],
-            level: process.env.LOG_LEVEL || "info" // Log level from environment variables
+            level: level
         }
     }
 });
