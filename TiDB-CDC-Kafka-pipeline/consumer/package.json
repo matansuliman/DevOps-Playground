@@ -1,0 +1,13 @@
+{
+    "name": "cdc-consumer",
+    "version": "1.0.0",
+    "main": "src/index.js",
+    "type": "commonjs",
+    "scripts": {
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "kafkajs": "^2.2.4",
+        "log4js": "^6.9.1"
+    }
+}
