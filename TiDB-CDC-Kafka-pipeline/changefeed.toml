@@ -1,0 +1,6 @@
+[filter]
+rules = ['*.*']
+
+[[filter.event-filters]]
+matcher = ["*.*"]
+ignore-event = ["create table", "drop table", "truncate table", "alter table", "rename table"]
